@@ -1,6 +1,5 @@
 import { Service } from "typedi";
 import RedisClient from "../redis/redis.client";
-import { RecipesRepository } from "../repositories/recipes.repository";
 import { QUEUES } from "../amqp/queues.amqp";
 import serverAmqp from "../amqp/server.amqp";
 import { IReceiveIngredientsMessage } from "../interfaces/receiveIngredients.interface";
