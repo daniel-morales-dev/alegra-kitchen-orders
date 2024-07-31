@@ -1,11 +1,13 @@
 import { Service } from "typedi";
 import RedisClient from "../redis/redis.client";
 import { QUEUES } from "../amqp/queues.amqp";
+import serverAmqp from "../amqp/server.amqp";
+import { RecipesRepository } from "../repositories/recipes.repository";
 
 @Service()
 export class ProcessOrderWorker {
   private redisClient: RedisClient;
-  constructor() {
+  constructor(private readonly recipeRepository: RecipesRepository) {
     this.redisClient = RedisClient.getInstance();
   }
   async run(message: string, ack: () => void) {
@@ -14,12 +16,13 @@ export class ProcessOrderWorker {
       console.log("Processing message:", msg);
       const keyRedis = `${QUEUES.REGISTER_ORDER.NAME}:${msg.data.uuid}`;
       const redisTest = await this.redisClient.get(keyRedis);
-      const newData = JSON.parse(redisTest);
-      newData.status = "processing";
-      console.log("Redis Test:", JSON.parse(redisTest));
-      await new Promise((resolve) => setTimeout(resolve, 20000));
-      await this.redisClient.set(keyRedis, JSON.stringify(newData));
-      console.log("Message processed successfully");
+
+      redisTest.status = "processing";
+      await this.redisClient.set(keyRedis, redisTest);
+
+      const randomRecipe = await this.recipeRepository.getRandomRecipe();
+      console.log("RANDOM RECIPE", randomRecipe);
+
       ack();
     } catch (exception) {
       console.error("ERROR: RegisterOrderWorker.run", exception);

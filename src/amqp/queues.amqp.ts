@@ -6,6 +6,9 @@ export const QUEUES = {
     NAME: "REGISTER_ORDER",
     HANDLER: ProcessOrderWorker,
   },
+  REQUEST_FOOD: {
+    NAME: "REQUEST_FOOD",
+  },
 };
 
 export const QUEUES_TO_SUBSCRIBE: IQueuesToSubscribe[] = [
