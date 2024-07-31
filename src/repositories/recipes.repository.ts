@@ -11,9 +11,17 @@ export class RecipesRepository extends Repository<Recipes> {
   getRandomRecipe() {
     return this.createQueryBuilder("r")
       .select(["r.id", "r.name", "ri.id", "ri.ingredientId", "ri.quantity"])
-      .innerJoin("r.recipeIngredients", "ri")
-      .orderBy("RANDOM()")
-      .limit(1)
+      .innerJoinAndSelect("r.recipeIngredients", "ri")
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select("r2.id")
+          .from(Recipes, "r2")
+          .orderBy("RANDOM()")
+          .limit(1)
+          .getQuery();
+        return "r.id IN " + subQuery;
+      })
       .getOne();
   }
 }

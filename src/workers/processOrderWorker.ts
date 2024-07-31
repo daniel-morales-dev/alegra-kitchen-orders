@@ -15,13 +15,31 @@ export class ProcessOrderWorker {
     try {
       console.log("Processing message:", msg);
       const keyRedis = `${QUEUES.REGISTER_ORDER.NAME}:${msg.data.uuid}`;
-      const redisTest = await this.redisClient.get(keyRedis);
+      const redisMessage = await this.redisClient.get(keyRedis);
 
-      redisTest.status = "processing";
-      await this.redisClient.set(keyRedis, redisTest);
+      redisMessage.status = "processing";
 
       const randomRecipe = await this.recipeRepository.getRandomRecipe();
-      console.log("RANDOM RECIPE", randomRecipe);
+
+      await this.redisClient.set(keyRedis, {
+        ...redisMessage,
+        keyRedis,
+        recipe: randomRecipe,
+      });
+
+      const ingredientsToRequest = randomRecipe?.recipeIngredients.map(
+        (recipeIngredient) => ({
+          ingredientId: recipeIngredient.ingredientId,
+          quantity: recipeIngredient.quantity,
+        }),
+      );
+
+      await serverAmqp.sendToQueue(QUEUES.REQUEST_FOOD.NAME, {
+        ingredients: ingredientsToRequest,
+        uuid: msg.data.uuid,
+        keyRedis,
+        recipe: randomRecipe,
+      });
 
       ack();
     } catch (exception) {
