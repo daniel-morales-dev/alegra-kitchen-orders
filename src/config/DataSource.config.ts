@@ -5,8 +5,8 @@ import Container from "typedi";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  entities: [resolve("src/models/*{.ts,.js}")],
-  migrations: [resolve("src/migrations/*{.ts,.js}")],
+  entities: [resolve(__dirname, "../models/*{.ts,.js}")],
+  migrations: [resolve(__dirname, "../migrations/*{.ts,.js}")],
   synchronize: false,
   logging: true,
   url: process.env.DATABASE_URL,
