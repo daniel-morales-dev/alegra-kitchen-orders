@@ -17,11 +17,12 @@ export const QUEUES = {
   RECEIVE_ORDER_FINISHED: {
     NAME: "RECEIVE_ORDER_FINISHED",
   },
+  UPDATE_STATUS_ORDER: {
+    NAME: "UPDATE_STATUS_ORDER",
+  },
 };
 
 export const QUEUES_TO_SUBSCRIBE: IQueuesToSubscribe[] = [
   QUEUES.REGISTER_ORDER,
   QUEUES.SEND_INGREDIENTS,
 ];
-
-export const QUEUE_LIST = Object.values(QUEUES);

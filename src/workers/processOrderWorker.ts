@@ -3,6 +3,7 @@ import RedisClient from "../redis/redis.client";
 import { QUEUES } from "../amqp/queues.amqp";
 import serverAmqp from "../amqp/server.amqp";
 import { RecipesRepository } from "../repositories/recipes.repository";
+import { IProcessOrderMsg } from "../interfaces/processOrder.interface";
 
 @Service()
 export class ProcessOrderWorker {
@@ -11,9 +12,10 @@ export class ProcessOrderWorker {
     this.redisClient = RedisClient.getInstance();
   }
   async run(message: string, ack: () => void) {
-    const msg = JSON.parse(message);
+    const msg: IProcessOrderMsg = JSON.parse(message);
     try {
-      console.log("Processing message:", msg);
+      const { uuid } = msg;
+      console.info(`[INFO] Order incoming ${uuid}`);
       const keyRedis = `${QUEUES.REGISTER_ORDER.NAME}:${msg.uuid}`;
       const redisMessage = await this.redisClient.get(keyRedis);
 
@@ -34,6 +36,12 @@ export class ProcessOrderWorker {
         }),
       );
 
+      await serverAmqp.sendToQueue(QUEUES.UPDATE_STATUS_ORDER.NAME, {
+        uuid: msg.uuid,
+        keyRedis,
+        status: "in_kitchen",
+      });
+
       await serverAmqp.sendToQueue(QUEUES.REQUEST_FOOD.NAME, {
         ingredients: ingredientsToRequest,
         uuid: msg.uuid,
@@ -43,8 +51,11 @@ export class ProcessOrderWorker {
 
       ack();
     } catch (exception) {
-      console.error("ERROR: RegisterOrderWorker.run", exception);
-      throw exception;
+      console.error("ERROR: ProcessOrderWorker.run", exception);
+      await serverAmqp.sendToQueue("error_queue", {
+        error: exception,
+        originalMessage: message,
+      });
     }
   }
 }

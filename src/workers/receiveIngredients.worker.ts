@@ -28,17 +28,19 @@ export class ReceiveIngredients {
       // Simulate any process
       await new Promise((res) => setTimeout(res, 3000));
 
+      console.info(`[INFO] Order ${uuid} cooked`);
+      console.info(`[INFO] Send order ${uuid} to manager`);
       await serverAmqp.sendToQueue(
         QUEUES.RECEIVE_ORDER_FINISHED.NAME,
         newMessage,
       );
-      console.info(`[INFO] Order ${uuid} cooked`);
-      console.info(`[INFO] Send order ${uuid} to manager`);
-
       ack();
     } catch (exception) {
-      console.error("ERROR: RegisterOrderWorker.run", exception);
-      throw exception;
+      console.error("ERROR: ReceiveIngredients.run", exception);
+      await serverAmqp.sendToQueue("error_queue", {
+        error: exception,
+        originalMessage: message,
+      });
     }
   }
 }
