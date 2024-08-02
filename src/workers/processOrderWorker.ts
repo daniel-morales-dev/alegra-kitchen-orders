@@ -40,6 +40,7 @@ export class ProcessOrderWorker {
         uuid: msg.uuid,
         keyRedis,
         status: "in_kitchen",
+        recipe: randomRecipe,
       });
 
       await serverAmqp.sendToQueue(QUEUES.REQUEST_FOOD.NAME, {

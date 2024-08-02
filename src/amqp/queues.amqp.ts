@@ -6,6 +6,7 @@ export const QUEUES = {
   REGISTER_ORDER: {
     NAME: "REGISTER_ORDER",
     HANDLER: ProcessOrderWorker,
+    PREFETCH: 2,
   },
   REQUEST_FOOD: {
     NAME: "REQUEST_FOOD",
@@ -13,6 +14,7 @@ export const QUEUES = {
   SEND_INGREDIENTS: {
     NAME: "SEND_INGREDIENTS",
     HANDLER: ReceiveIngredients,
+    PREFETCH: 2,
   },
   RECEIVE_ORDER_FINISHED: {
     NAME: "RECEIVE_ORDER_FINISHED",
