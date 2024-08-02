@@ -24,4 +24,11 @@ export class RecipesRepository extends Repository<Recipes> {
       })
       .getOne();
   }
+
+  getAllRecipes() {
+    return this.createQueryBuilder("r")
+      .select(["r.id", "r.name", "ri.id", "ri.ingredientId", "ri.quantity"])
+      .innerJoinAndSelect("r.recipeIngredients", "ri")
+      .getMany();
+  }
 }

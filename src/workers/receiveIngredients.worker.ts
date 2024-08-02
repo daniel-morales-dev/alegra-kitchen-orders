@@ -14,6 +14,7 @@ export class ReceiveIngredients {
     const msg: IReceiveIngredientsMessage = JSON.parse(message);
     try {
       const { keyRedis, recipe, uuid, status } = msg;
+
       console.info("[INFO] Receiving ingredients from order id", uuid);
 
       const newMessage = {
